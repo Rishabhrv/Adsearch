@@ -88,7 +88,8 @@ if not filtered_data.empty:
 
         # Handle missing ISBN
         
-        isbn_display = book['ISBN'] if book['ISBN'] else "<span style='color:#ff6b6b;font-weight:bold;'>Pending</span>"
+        isbn_display = (str(book['ISBN']).lower().strip() if str(book['ISBN']).lower().strip() != "nan" and book['ISBN'] != "" 
+                        else "<span style='color:#ff6b6b;font-weight:bold;'>Pending</span>")
 
         # Helper function for highlighting boolean values
         def highlight_boolean(value):
