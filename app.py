@@ -82,9 +82,21 @@ if not filtered_data.empty:
 
     for _, book in filtered_data.iterrows():
         # Determine book status
-        deliver_status = str(book['Deliver']).strip().lower()  # Normalize for comparison
+        deliver_status = str(book['Deliver']).strip().lower()
         status = "Pending" if deliver_status == "false" else "Delivered"
         status_color = "#ff6b6b" if status == "Pending" else "#51cf66"
+
+        # Handle missing ISBN
+        
+        isbn_display = book['ISBN'] if book['ISBN'] else "<span style='color:#ff6b6b;font-weight:bold;'>Pending</span>"
+
+        # Helper function for highlighting boolean values
+        def highlight_boolean(value):
+            value = str(value).strip().lower()
+            if value == "true":
+                return "<span style='color: #51cf66; font-weight: bold;'> Yes</span>"
+            else:
+                return "<span style='color: #ff6b6b; font-weight: bold;'> No</span>"
 
         with st.container():
             st.markdown(
@@ -124,30 +136,31 @@ if not filtered_data.empty:
                         color: #343a40;">
                         <div>
                             <p>🔖 <b>Book ID:</b> {book['Book ID']}</p>
-                            <p>📚 <b>ISBN:</b> {book['ISBN']}</p>
+                            <p>📚 <b>ISBN:</b> {isbn_display}</p>
                             <p>📅 <b>Enroll Date:</b> {book['Date']}</p>
                             <p>🗓️ <b>Book Month:</b> {book['Month']}</p>
                             <p>⌛ <b>Since Enrolled:</b> {book['Since Enrolled']}</p>
                         </div>
                         <div>
                             <p>👥 <b>No of Authors:</b> {book['No of Author']}</p>
-                            <p>✅ <b>Book Done:</b> {book['Book Complete']}</p>
-                            <p>📄 <b>Agreement Received:</b> {book['Agreement Received']}</p>
-                            <p>📤 <b>Send Cover Page:</b> {book['Send Cover Page and Agreement']}</p>
-                            <p>🖼️ <b>Digital Prof:</b> {book['Digital Prof']}</p>
+                            <p>✅ <b>Book Done:</b> {highlight_boolean(book['Book Complete'])}</p>
+                            <p>📄 <b>Agreement Received:</b> {highlight_boolean(book['Agreement Received'])}</p>
+                            <p>📤 <b>Send Cover Page:</b> {highlight_boolean(book['Send Cover Page and Agreement'])}</p>
+                            <p>🖼️ <b>Digital Prof:</b> {highlight_boolean(book['Digital Prof'])}</p>
                         </div>
                         <div>
-                            <p>📜 <b>Plagiarism Report:</b> {book['Plagiarism Report']}</p>
-                            <p>🔔 <b>Confirmation:</b> {book['Confirmation']}</p>
-                            <p>🖨️ <b>Ready to Print:</b> {book['Ready to Print']}</p>
-                            <p>📦 <b>Print:</b> {book['Print']}</p>
-                            <p>🚚 <b>Deliver:</b> {book['Deliver']}</p>
+                            <p>📜 <b>Plagiarism Report:</b> {highlight_boolean(book['Plagiarism Report'])}</p>
+                            <p>🔔 <b>Confirmation:</b> {highlight_boolean(book['Confirmation'])}</p>
+                            <p>🖨️ <b>Ready to Print:</b> {highlight_boolean(book['Ready to Print'])}</p>
+                            <p>📦 <b>Print:</b> {highlight_boolean(book['Print'])}</p>
+                            <p>🚚 <b>Deliver:</b> {highlight_boolean(book['Deliver'])}</p>
                         </div>
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
+
 
 
 
