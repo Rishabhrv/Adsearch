@@ -47,18 +47,20 @@ st.title("📚 AGPH Advance Search")
 col1, col2 = st.columns(2)
 
 with col1:
-    search_column = st.selectbox("🔍 Select Column to Search:", ['Book ID', 'Book Title', 'Author Name', 'ISBN'])
+    search_column = st.selectbox("🗃️ Select Column to Search:", ['Book ID', 'Book Title', 'Author Name', 'ISBN'])
 with col2:
-    search_query = st.text_input("✒️ Enter your search term:")
+    search_query = st.text_input("🔍 Enter your search term:")
 
 # Filter results
 filtered_data = pd.DataFrame()
 if search_query:
     if search_column == "Author Name":
         # Logic for Author Name
-        results = operations_data.isin([search_query])
-        found_rows = results.any(axis=1)
-        filtered_data = operations_data[found_rows]
+        mask = (operations_data['Author Name 1'].str.contains(search_query, case=False, na=False) |
+                operations_data['Author Name 2'].str.contains(search_query, case=False, na=False) |
+                operations_data['Author Name 3'].str.contains(search_query, case=False, na=False) |
+                operations_data['Author Name 4'].str.contains(search_query, case=False, na=False))
+        filtered_data = operations_data[mask]
     elif search_column == "Book Title":
         # Logic for Book Title
         filtered_data = operations_data[
