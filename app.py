@@ -40,16 +40,38 @@ def get_book_and_author_details(book_info):
     return book_details
 
 
-# Streamlit App
+# Initialize session state for the text input field
+if "previous_search_column" not in st.session_state:
+    st.session_state["previous_search_column"] = ""
+if "search_query" not in st.session_state:
+    st.session_state["search_query"] = ""
+
+# Title
 st.title("📚 AGPH Advance Search")
 
 # Columns for search inputs
 col1, col2 = st.columns(2)
 
+# Dropdown for selecting the search column
 with col1:
-    search_column = st.selectbox("🗃️ Select Column to Search:", ['Book ID', 'Book Title', 'Author Name', 'ISBN'])
+    search_column = st.selectbox(
+        "🗃️ Select Column to Search:", 
+        ['Book ID', 'Book Title', 'Author Name', 'ISBN']
+    )
+
+# Check if the selected column has changed
+if search_column != st.session_state["previous_search_column"]:
+    # Reset the search query if the column changes
+    st.session_state["search_query"] = ""
+    st.session_state["previous_search_column"] = search_column
+
+# Text input for search query
 with col2:
-    search_query = st.text_input("🔍 Enter your search term:")
+    search_query = st.text_input(
+        "🔍 Enter your search term:", 
+        value=st.session_state["search_query"],
+        key="search_query"
+    )
 
 # Filter results
 filtered_data = pd.DataFrame()
@@ -228,7 +250,128 @@ if not filtered_data.empty:
                             </div>
                             """,
                             unsafe_allow_html=True,
-                        )                  
+                        )
+
+            def handle_missing(value):
+                if pd.isna(value) or str(value).strip().lower() in ["nan", ""]:
+                    return "<span style='color: #ff6b6b; font-weight: bold;'>Pending</span>"
+                return value
+
+            with st.expander("📘 Book Operation Details"):
+                    # Layout: Three cards in a row
+                    col1, col2, col3 = st.columns(3)
+
+                    # Writing Details
+                    with col1:
+                        st.markdown(
+                            f"""
+                            <div style="
+                                background-color: #ffffff;
+                                border-radius: 12px;
+                                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                                padding: 15px;
+                                margin-bottom: 20px;
+                                border: 1px solid #dee2e6;
+                                font-family: 'Arial', sans-serif;">
+                                <h4 style="
+                                    color: #495057;
+                                    background-color: #e9ecef;
+                                    padding: 10px;
+                                    border-radius: 8px;
+                                    margin-bottom: 15px;
+                                    text-align: center;">
+                                    ✍️ Writing Details
+                                </h4>
+                                <div style="font-size: 14px; color: #495057; line-height: 1.6;">
+                                    <p><b>Writing Complete:</b> {highlight_boolean(book['Writing Complete'])}</p>
+                                    <p><b>Written By:</b> 
+                                        <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Writing By'])}</span>
+                                    </p>
+                                    <p><b>Start Date:</b> {handle_missing(book['Writing Start Date'])}</p>
+                                    <p><b>Start Time:</b> {handle_missing(book['Writing Start Time'])}</p>
+                                    <p><b>End Date:</b> {handle_missing(book['Writing End Date'])}</p>
+                                    <p><b>End Time:</b> {handle_missing(book['Writing End Time'])}</p>
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+                    # Proofreading Details
+                    with col2:
+                        st.markdown(
+                            f"""
+                            <div style="
+                                background-color: #ffffff;
+                                border-radius: 12px;
+                                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                                padding: 15px;
+                                margin-bottom: 20px;
+                                border: 1px solid #dee2e6;
+                                font-family: 'Arial', sans-serif;">
+                                <h4 style="
+                                    color: #495057;
+                                    background-color: #e9ecef;
+                                    padding: 10px;
+                                    border-radius: 8px;
+                                    margin-bottom: 15px;
+                                    text-align: center;">
+                                    📝 Proofreading Details
+                                </h4>
+                                <div style="font-size: 14px; color: #495057; line-height: 1.6;">
+                                    <p><b>Proofreading Complete:</b> {highlight_boolean(book['Proofreading Complete'])}</p>
+                                    <p><b>Proofread By:</b> 
+                                        <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Proofreading By'])}</span>
+                                    </p>
+                                    <p><b>Start Date:</b> {handle_missing(book['Proofreading Start Date'])}</p>
+                                    <p><b>Start Time:</b> {handle_missing(book['Proofreading Start Time'])}</p>
+                                    <p><b>End Date:</b> {handle_missing(book['Proofreading End Date'])}</p>
+                                    <p><b>End Time:</b> {handle_missing(book['Proofreading End Time'])}</p>
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+                    # Formatting Details
+                    with col3:
+                        st.markdown(
+                            f"""
+                            <div style="
+                                background-color: #ffffff;
+                                border-radius: 12px;
+                                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                                padding: 15px;
+                                margin-bottom: 20px;
+                                border: 1px solid #dee2e6;
+                                font-family: 'Arial', sans-serif;">
+                                <h4 style="
+                                    color: #495057;
+                                    background-color: #e9ecef;
+                                    padding: 10px;
+                                    border-radius: 8px;
+                                    margin-bottom: 15px;
+                                    text-align: center;">
+                                    📂 Formatting Details
+                                </h4>
+                                <div style="font-size: 14px; color: #495057; line-height: 1.6;">
+                                    <p><b>Formatting Complete:</b> {highlight_boolean(book['Formating Complete'])}</p>
+                                    <p><b>Formatted By:</b> 
+                                        <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Formating By'])}</span>
+                                    </p>
+                                    <p><b>Start Date:</b> {handle_missing(book['Formating Start Date'])}</p>
+                                    <p><b>Start Time:</b> {handle_missing(book['Formating Start Time'])}</p>
+                                    <p><b>End Date:</b> {handle_missing(book['Formating End Date'])}</p>
+                                    <p><b>End Time:</b> {handle_missing(book['Formating End Time'])}</p>
+                                </div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+
+
+
+              
 
 else:
     if search_query:
