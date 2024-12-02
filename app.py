@@ -78,6 +78,11 @@ if search_query:
         operations_data['ISBN'] = operations_data['ISBN'].astype(str).str.strip()
         filtered_data = operations_data[operations_data['ISBN'] == search_query]
 
+
+# full dataframe search
+# mask = operations.apply(lambda row: row.astype(str).str.contains(search_string, case=False, na=False).any(), axis=1)
+# result = operations[mask]
+
 # Display results
 if not filtered_data.empty:
     st.success(f"Found {len(filtered_data)} results for '{search_query}' in '{search_column}'")
@@ -164,44 +169,72 @@ if not filtered_data.empty:
                 unsafe_allow_html=True,
             )
 
-
-
-
-
             # Expandable section for author details
             with st.expander("📋 View Author Details"):
-                authors = get_book_and_author_details(book)
+                authors = get_book_and_author_details(book)  # Fetch authors details
+                total_authors = len(authors)
+
+                # Helper function to highlight boolean values
+                def highlight_boolean(value):
+                    value = str(value).strip().lower()
+                    if value == "true":
+                        return "<span style='color: #51cf66; font-weight: bold;'>Yes</span>"
+                    else:
+                        return "<span style='color: #ff6b6b; font-weight: bold;'>No</span>"
+
+                # Create a 4-column layout for author cards
                 for idx, author in enumerate(authors, start=1):
-                    st.markdown(f"**Author {idx}:**")
-                    st.markdown(f"- **Author ID:** {author['Author ID']}")
-                    st.markdown(f"- **Name:** {author['Author Name']}")
-                    st.markdown(f"- **Position:** {author['Position']}")
-                    st.markdown(f"- **Email:** {author['Email']}")
-                    st.markdown(f"- **Contact:** {author['Contact']}")
-                    st.markdown(f"- **Welcome Mail:** {author['Welcome Mail']}")
-                    st.markdown(f"- **Author Detail:** {author['Author Detail']}")
-                    st.markdown(f"- **Photo:** {author['Photo']}")
-                    st.markdown(f"- **ID Proof:** {author['ID Proof']}")
-                    st.markdown(f"- **Send Cover Page:** {author['Send Cover Page']}")
-                    st.markdown(f"- **Agreement Received:** {author['Agreement Received']}")
-                    st.markdown(f"- **Digital Profile:** {author['Digital Prof']}")
-                    st.markdown(f"- **Plagiarism Report:** {author['Plagiarism Report']}")
-                    st.markdown(f"- **Confirmation:** {author['Confirmation']}")
-                    st.markdown("---")
+                    if idx % 4 == 1:  # Start a new row for every 4 authors
+                        cols = st.columns(4)  # Create 4 columns
+
+                    # Card content
+                    with cols[(idx - 1) % 4]:
+                        st.markdown(
+                            f"""
+                            <div style="
+                                background-color: #ffffff;
+                                border-radius: 12px;
+                                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                                padding: 15px;
+                                margin-bottom: 20px;
+                                border: 1px solid #dee2e6;
+                                font-family: 'Arial', sans-serif;">
+                                <h4 style="
+                                    color: #495057;
+                                    background-color: #e9ecef;
+                                    padding: 10px;
+                                    border-radius: 8px;
+                                    margin-bottom: 15px;
+                                    text-align: center;">
+                                    Author {idx} 
+                                    <span style="font-size: 14px; font-weight: 400; color: #868e96;">
+                                        ({author['Position']})
+                                    </span>
+                                </h4>
+                                <p style="font-size: 16px; font-weight: bold; color: #1c7ed6; margin-bottom: 10px;">
+                                    {author['Author Name']}
+                                </p>
+                                <p><b>Author ID:</b> {author['Author ID']}</p>
+                                <p><b>Email:</b> {author['Email']}</p>
+                                <p><b>Contact:</b> {author['Contact']}</p>
+                                <p><b>Welcome Mail:</b> {highlight_boolean(author['Welcome Mail'])}</p>
+                                <p><b>Photo:</b> {highlight_boolean(author['Photo'])}</p>
+                                <p><b>ID Proof:</b> {highlight_boolean(author['ID Proof'])}</p>
+                                <p><b>Send Cover Page:</b> {highlight_boolean(author['Send Cover Page'])}</p>
+                                <p><b>Agreement Received:</b> {highlight_boolean(author['Agreement Received'])}</p>
+                                <p><b>Digital Profile:</b> {highlight_boolean(author['Digital Prof'])}</p>
+                                <p><b>Plagiarism Report:</b> {highlight_boolean(author['Plagiarism Report'])}</p>
+                                <p><b>Confirmation:</b> {highlight_boolean(author['Confirmation'])}</p>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )                  
+
 else:
     if search_query:
         st.error(f"No results found for '{search_query}' in '{search_column}'")
     else:
         st.info("Enter a search term to begin.")
-
-
-
-
-
-
-
-
-
 
 
 # # Step 1: Identify date columns
