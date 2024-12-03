@@ -184,3 +184,4 @@ pyrightconfig.json
 [Ss]cripts
 pyvenv.cfg
 pip-selfcheck.json
+full_operations.csv
