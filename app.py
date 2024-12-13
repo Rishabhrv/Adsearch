@@ -6,17 +6,66 @@ import pandas as pd
 import json
 import os
 import pandas as pd
-
+from dotenv import load_dotenv
 import gspread
 import warnings
 warnings.simplefilter('ignore')
 from google.oauth2.service_account import Credentials 
+import base64
+import hashlib
+import hmac
+import time
+
+
 
 st.set_page_config(page_title='Advance search', page_icon=None, layout="wide")
 
-
+load_dotenv()
 creds_path = os.getenv('CREDS_PATH', 'token.json')
 sheets_json_path = os.getenv('SHEETS_JSON_PATH', 'sheets.json')
+SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key') 
+
+def validate_token():
+    # Extract the token from query parameters
+    params = st.query_params  # st.query_params for earlier versions
+    if 'token' not in params:
+        st.error("Access Denied: Login Required")
+        st.stop()
+
+    token = params['token']
+    try:
+        # Split the JWT into header, payload, and signature
+        parts = token.split('.')
+        if len(parts) != 3:
+            raise ValueError("Invalid token format")
+
+        # Decode header and payload
+        header = json.loads(base64.urlsafe_b64decode(parts[0] + '==').decode('utf-8'))
+        payload = json.loads(base64.urlsafe_b64decode(parts[1] + '==').decode('utf-8'))
+
+        # Verify signature
+        signature = base64.urlsafe_b64decode(parts[2] + '==')
+        expected_signature = hmac.new(
+            SECRET_KEY.encode(),
+            f"{parts[0]}.{parts[1]}".encode(),
+            hashlib.sha256
+        ).digest()
+
+        if not hmac.compare_digest(signature, expected_signature):
+            raise ValueError("Invalid token signature")
+
+        # Check expiration (if present)
+        if 'exp' in payload and payload['exp'] < time.time():
+            raise ValueError("Token has expired")
+
+        # Access payload data (e.g., user and role)
+        #st.success(f"Welcome {payload['user']}! Role: {payload['role']}")
+
+    except ValueError as e:
+        st.error(f"Access Denied: {e}")
+        st.stop()
+
+validate_token()
 
 def read_sheets_from_json():
     if os.path.exists(sheets_json_path):
