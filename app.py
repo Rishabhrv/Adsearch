@@ -65,7 +65,7 @@ def validate_token():
         st.error(f"Access Denied: {e}")
         st.stop()
 
-validate_token()
+#validate_token()
 
 def read_sheets_from_json():
     if os.path.exists(sheets_json_path):
