@@ -18,7 +18,7 @@ import time
 
 
 
-st.set_page_config(page_title='Advance search', page_icon=None, layout="wide")
+st.set_page_config(page_title='AGPH Search', page_icon="🔍", layout="wide")
 
 load_dotenv()
 creds_path = os.getenv('CREDS_PATH', 'token.json')
@@ -65,7 +65,7 @@ def validate_token():
         st.error(f"Access Denied: {e}")
         st.stop()
 
-#validate_token()
+validate_token()
 
 def read_sheets_from_json():
     if os.path.exists(sheets_json_path):
