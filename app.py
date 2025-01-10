@@ -95,9 +95,7 @@ def operations_preprocess(data):
             data[col] = pd.to_datetime(data[col], format="%d/%m/%Y", errors='coerce')
 
     if 'Date' in data.columns:
-        # Filter data by the specified year
-        data = data[data['Date'].dt.year == 2024]
-
+        
         # Add a column for the month name
         data['Month'] = data['Date'].dt.strftime('%B')
 
@@ -378,116 +376,153 @@ if not filtered_data.empty:
                 return value
 
             with st.expander("📘 Operation Details"):
-                    # Layout: Three cards in a row
-                    col1, col2, col3 = st.columns(3)
+                # Layout: Three cards in a row
+                col1, col2, col3 = st.columns(3)
 
-                    # Writing Details
-                    with col1:
-                        st.markdown(
-                            f"""
-                            <div style="
-                                background-color: #ffffff;
-                                border-radius: 12px;
-                                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-                                padding: 15px;
-                                margin-bottom: 20px;
-                                border: 1px solid #dee2e6;
-                                font-family: 'Arial', sans-serif;">
-                                <h4 style="
-                                    color: #495057;
-                                    background-color: #e9ecef;
-                                    padding: 10px;
-                                    border-radius: 8px;
-                                    margin-bottom: 15px;
-                                    text-align: center;">
-                                    ✍️ Writing Details
-                                </h4>
-                                <div style="font-size: 14px; color: #495057; line-height: 1.6;">
-                                    <p><b>Writing Complete:</b> {highlight_boolean(book['Writing Complete'])}</p>
-                                    <p><b>Written By:</b> 
-                                        <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Writing By'])}</span>
-                                    </p>
-                                    <p><b>Start Date:</b> {handle_missing(book['Writing Start Date'])}</p>
-                                    <p><b>Start Time:</b> {handle_missing(book['Writing Start Time'])}</p>
-                                    <p><b>End Date:</b> {handle_missing(book['Writing End Date'])}</p>
-                                    <p><b>End Time:</b> {handle_missing(book['Writing End Time'])}</p>
-                                </div>
+                # Writing Details
+                with col1:
+                    status = "Done" if book['Writing Complete'] == "TRUE" else "Pending"
+                    status_color = "#51cf66" if status == "Done" else "#ff6b6b"
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                            padding: 15px;
+                            margin-bottom: 20px;
+                            border: 1px solid #dee2e6;
+                            font-family: 'Arial', sans-serif;">
+                            <h4 style="
+                                color: #495057;
+                                background-color: #e9ecef;
+                                padding: 10px;
+                                border-radius: 8px;
+                                margin-bottom: 15px;
+                                text-align: center;
+                                font-size: 20px;">
+                                ✍️ Writing Details 
+                                <span style="
+                                background-color: {status_color};
+                                color: white;
+                                padding: 5px 10px;
+                                border-radius: 15px;
+                                font-size: 12px;
+                                margin-left: 10px;">
+                                {status}
+                            </span>
+                            </h4>
+                            <div style="font-size: 14px; color: #495057; line-height: 1.6;">
+                                <p><b>Writing Complete:</b> {highlight_boolean(book['Writing Complete'])}</p>
+                                <p><b>Written By:</b> 
+                                    <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Writing By'])}</span>
+                                </p>
+                                <p><b>Start Date:</b> {handle_missing(book['Writing Start Date'])}</p>
+                                <p><b>Start Time:</b> {handle_missing(book['Writing Start Time'])}</p>
+                                <p><b>End Date:</b> {handle_missing(book['Writing End Date'])}</p>
+                                <p><b>End Time:</b> {handle_missing(book['Writing End Time'])}</p>
                             </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
-                    # Proofreading Details
-                    with col2:
-                        st.markdown(
-                            f"""
-                            <div style="
-                                background-color: #ffffff;
-                                border-radius: 12px;
-                                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-                                padding: 15px;
-                                margin-bottom: 20px;
-                                border: 1px solid #dee2e6;
-                                font-family: 'Arial', sans-serif;">
-                                <h4 style="
-                                    color: #495057;
-                                    background-color: #e9ecef;
-                                    padding: 10px;
-                                    border-radius: 8px;
-                                    margin-bottom: 15px;
-                                    text-align: center;">
-                                    📝 Proofreading Details
-                                </h4>
-                                <div style="font-size: 14px; color: #495057; line-height: 1.6;">
-                                    <p><b>Proofreading Complete:</b> {highlight_boolean(book['Proofreading Complete'])}</p>
-                                    <p><b>Proofread By:</b> 
-                                        <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Proofreading By'])}</span>
-                                    </p>
-                                    <p><b>Start Date:</b> {handle_missing(book['Proofreading Start Date'])}</p>
-                                    <p><b>Start Time:</b> {handle_missing(book['Proofreading Start Time'])}</p>
-                                    <p><b>End Date:</b> {handle_missing(book['Proofreading End Date'])}</p>
-                                    <p><b>End Time:</b> {handle_missing(book['Proofreading End Time'])}</p>
-                                </div>
+                # Proofreading Details
+                with col2:
+                    status = "Done" if book['Proofreading Complete'] == "TRUE" else "Pending"
+                    status_color = "#51cf66" if status == "Done" else "#ff6b6b"
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                            padding: 15px;
+                            margin-bottom: 20px;
+                            border: 1px solid #dee2e6;
+                            font-family: 'Arial', sans-serif;">
+                            <h4 style="
+                                color: #495057;
+                                background-color: #e9ecef;
+                                padding: 10px;
+                                border-radius: 8px;
+                                margin-bottom: 15px;
+                                text-align: center;
+                                font-size: 20px;">
+                                📝 Proofreading Details 
+                                 <span style="
+                                    background-color: {status_color};
+                                    color: white;
+                                    padding: 5px 10px;
+                                    border-radius: 15px;
+                                    font-size: 12px;
+                                    margin-left: 10px;">
+                                    {status}
+                                </span>
+                            </h4>
+                            <div style="font-size: 14px; color: #495057; line-height: 1.6;">
+                                <p><b>Proofreading Complete:</b> {highlight_boolean(book['Proofreading Complete'])}</p>
+                                <p><b>Proofread By:</b> 
+                                    <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Proofreading By'])}</span>
+                                </p>
+                                <p><b>Start Date:</b> {handle_missing(book['Proofreading Start Date'])}</p>
+                                <p><b>Start Time:</b> {handle_missing(book['Proofreading Start Time'])}</p>
+                                <p><b>End Date:</b> {handle_missing(book['Proofreading End Date'])}</p>
+                                <p><b>End Time:</b> {handle_missing(book['Proofreading End Time'])}</p>
                             </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
-                    # Formatting Details
-                    with col3:
-                        st.markdown(
-                            f"""
-                            <div style="
-                                background-color: #ffffff;
-                                border-radius: 12px;
-                                box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-                                padding: 15px;
-                                margin-bottom: 20px;
-                                border: 1px solid #dee2e6;
-                                font-family: 'Arial', sans-serif;">
-                                <h4 style="
-                                    color: #495057;
-                                    background-color: #e9ecef;
-                                    padding: 10px;
-                                    border-radius: 8px;
-                                    margin-bottom: 15px;
-                                    text-align: center;">
-                                    📂 Formatting Details
-                                </h4>
-                                <div style="font-size: 14px; color: #495057; line-height: 1.6;">
-                                    <p><b>Formatting Complete:</b> {highlight_boolean(book['Formating Complete'])}</p>
-                                    <p><b>Formatted By:</b> 
-                                        <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Formating By'])}</span>
-                                    </p>
-                                    <p><b>Start Date:</b> {handle_missing(book['Formating Start Date'])}</p>
-                                    <p><b>Start Time:</b> {handle_missing(book['Formating Start Time'])}</p>
-                                    <p><b>End Date:</b> {handle_missing(book['Formating End Date'])}</p>
-                                    <p><b>End Time:</b> {handle_missing(book['Formating End Time'])}</p>
-                                </div>
+                # Formatting Details
+                with col3:
+                    status = "Done" if book['Formating Complete'] == "TRUE" else "Pending"
+                    status_color = "#51cf66" if status == "Done" else "#ff6b6b"
+                    st.markdown(
+                        f"""
+                        <div style="
+                            background-color: #ffffff;
+                            border-radius: 12px;
+                            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+                            padding: 15px;
+                            margin-bottom: 20px;
+                            border: 1px solid #dee2e6;
+                            font-family: 'Arial', sans-serif;">
+                            <h4 style="
+                                color: #495057;
+                                background-color: #e9ecef;
+                                padding: 10px;
+                                border-radius: 8px;
+                                margin-bottom: 15px;
+                                text-align: center;
+                                font-size: 20px;">
+                                📂 Formatting Details 
+                                 <span style="
+                                    background-color: {status_color};
+                                    color: white;
+                                    padding: 5px 10px;
+                                    border-radius: 15px;
+                                    font-size: 12px;
+                                    margin-left: 10px;">
+                                    {status}
+                                </span>
+                            </h4>
+                            <div style="font-size: 14px; color: #495057; line-height: 1.6;">
+                                <p><b>Formatting Complete:</b> {highlight_boolean(book['Formating Complete'])}</p>
+                                <p><b>Formatted By:</b> 
+                                    <span style="color: #1c7ed6; font-weight: bold;">{handle_missing(book['Formating By'])}</span>
+                                </p>
+                                <p><b>Start Date:</b> {handle_missing(book['Formating Start Date'])}</p>
+                                <p><b>Start Time:</b> {handle_missing(book['Formating Start Time'])}</p>
+                                <p><b>End Date:</b> {handle_missing(book['Formating End Date'])}</p>
+                                <p><b>End Time:</b> {handle_missing(book['Formating End Time'])}</p>
                             </div>
-                            """,
-                            unsafe_allow_html=True,
-                        )
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
 
 else:
     if search_query:
