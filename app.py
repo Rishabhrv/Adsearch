@@ -155,6 +155,7 @@ try:
                     "Position": book_info.get(f'Position {i}', None),
                     "Email": book_info.get(f'Email Address {i}', None),
                     "Contact": book_info.get(f'Contact No. {i}', None),
+                    "Publishing Consultant": book_info.get(f'Publishing Consultant {i}', None),
                     "Welcome Mail": book_info.get(f'Welcome Mail / Confirmation {i}', None),
                     "Author Detail": book_info.get(f'Author Detail {i}', None),
                     "Photo": book_info.get(f'Photo {i}', None),
@@ -265,6 +266,22 @@ try:
                 else:
                     return "<span style='color: #ff6b6b; font-weight: bold;'> No</span>"
 
+            def generate_link_icons(book):
+                icons = {
+                    "Amazon Link": "https://img.icons8.com/color/48/000000/amazon.png",
+                    "Google Link": "https://img.icons8.com/color/48/000000/google-logo.png",
+                    "Flipkart Link": "https://img.icons8.com/?size=100&id=UU2im0hihoyi&format=png&color=000000",
+                    "AGPH Link": "https://img.icons8.com/ios-filled/50/000000/open-book.png",
+                }
+                links_html = ""
+                for column, icon_url in icons.items():
+                    # Safely retrieve the link and handle missing or invalid values
+                    link = book.get(column, None)
+                    if link is not None and pd.notna(link) and str(link).strip() != "":
+                        links_html += f"<a href='{str(link).strip()}' target='_blank'><img src='{icon_url}' alt='{column}' style='width:24px; margin-right:8px;'></a>"
+                return links_html
+
+
             with st.container():
                 st.markdown(
                     f"""
@@ -320,6 +337,8 @@ try:
                                 <p>🖨️ <b>Ready to Print:</b> {highlight_boolean(book['Ready to Print'])}</p>
                                 <p>📦 <b>Print:</b> {highlight_boolean(book['Print'])}</p>
                                 <p>🚚 <b>Deliver:</b> {highlight_boolean(book['Deliver'])}</p>
+                                <div><p>🔗 <b>Links:</b> {generate_link_icons(book)}</p></div>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -375,6 +394,9 @@ try:
                                     <p><b>Author ID:</b> {author['Author ID']}</p>
                                     <p><b>Email:</b> {author['Email']}</p>
                                     <p><b>Contact:</b> {author['Contact']}</p>
+                                    <p><b>Publishing Consultant:</b> 
+                                    <span style="color:rgb(236, 116, 35); font-weight: bold;">{author['Publishing Consultant']}</span>
+                                    </p>
                                     <p><b>Welcome Mail:</b> {highlight_boolean(author['Welcome Mail'])}</p>
                                     <p><b>Photo:</b> {highlight_boolean(author['Photo'])}</p>
                                     <p><b>ID Proof:</b> {highlight_boolean(author['ID Proof'])}</p>
