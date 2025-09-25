@@ -126,7 +126,7 @@ def operations_preprocess(data):
     return data
 
 def new_fucntoin():
-    pass
+    st.write("New Function")
 
 def connect_db():
     try:
