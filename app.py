@@ -94,6 +94,7 @@ if not st.session_state.visited:
 def read_sheets_from_json():
     if os.path.exists(sheets_json_path):
         with open(sheets_json_path, 'r') as file:
+            st.write("Loading sheet configuration...")
             return json.load(file)
     return {}
 
