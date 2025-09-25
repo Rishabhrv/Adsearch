@@ -125,6 +125,9 @@ def operations_preprocess(data):
 
     return data
 
+def new_fucntoin():
+    pass
+
 def connect_db():
     try:
         # Use st.cache_resource to only connect once
