@@ -113,6 +113,11 @@ def operations_preprocess(data):
         if col in data.columns:
             # Convert to datetime64[ns] first
             data[col] = pd.to_datetime(data[col], format="%d/%m/%Y", errors='coerce')
+    
+    # If 'Date' column exists, add 'Month' and 'Since Enrolled' columns
+    print(data.dtypes)
+
+    conn = connect_db()
 
     if 'Date' in data.columns:
         
