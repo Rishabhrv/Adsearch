@@ -75,7 +75,7 @@ def validate_token():
         st.error(f"Access Denied: {e}")
         st.stop()
 
-#validate_token()
+validate_token()
 
 # Initialize session state for new visitors
 if "visited" not in st.session_state:
