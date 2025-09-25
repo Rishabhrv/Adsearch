@@ -188,3 +188,4 @@ pyrightconfig.json
 pyvenv.cfg
 pip-selfcheck.json
 full_operations.csv
+.streamlit/secrets.toml

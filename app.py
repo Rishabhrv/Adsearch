@@ -16,6 +16,7 @@ import hashlib
 import hmac
 import time
 from dotenv import load_dotenv
+import extra_streamlit_components as stx
 
 
 st.set_page_config(page_title='AGPH Search', page_icon="🔍", layout="wide")
@@ -74,7 +75,7 @@ def validate_token():
         st.error(f"Access Denied: {e}")
         st.stop()
 
-validate_token()
+#validate_token()
 
 # Initialize session state for new visitors
 if "visited" not in st.session_state:
@@ -124,6 +125,152 @@ def operations_preprocess(data):
 
     return data
 
+def connect_db():
+    try:
+        # Use st.cache_resource to only connect once
+        @st.cache_resource
+        def get_connection():
+            return st.connection('mysql', type='sql')
+        conn = get_connection()
+        return conn
+    except Exception as e:
+        st.error(f"Error connecting to MySQL: {e}")
+        st.stop()
+
+# SQL query to consolidate book data with updated conditions
+query = """
+SELECT 
+    b.book_id AS `Book ID`,
+    b.title AS `Book Title`,
+    b.date AS `Date`,
+    COUNT(ba.author_id) AS `No of Author`,
+    MAX(CASE WHEN rn = 1 THEN ba.author_id END) AS `Author Id 1`,
+    MAX(CASE WHEN rn = 2 THEN ba.author_id END) AS `Author Id 2`,
+    MAX(CASE WHEN rn = 3 THEN ba.author_id END) AS `Author Id 3`,
+    MAX(CASE WHEN rn = 4 THEN ba.author_id END) AS `Author Id 4`,
+    MAX(CASE WHEN rn = 1 THEN a.name END) AS `Author Name 1`,
+    MAX(CASE WHEN rn = 2 THEN a.name END) AS `Author Name 2`,
+    MAX(CASE WHEN rn = 3 THEN a.name END) AS `Author Name 3`,
+    MAX(CASE WHEN rn = 4 THEN a.name END) AS `Author Name 4`,
+    MAX(CASE WHEN rn = 1 THEN ba.author_position END) AS `Position 1`,
+    MAX(CASE WHEN rn = 2 THEN ba.author_position END) AS `Position 2`,
+    MAX(CASE WHEN rn = 3 THEN ba.author_position END) AS `Position 3`,
+    MAX(CASE WHEN rn = 4 THEN ba.author_position END) AS `Position 4`,
+    MAX(CASE WHEN rn = 1 THEN ba.corresponding_agent END) AS `Corresponding Author/Agent 1`,
+    MAX(CASE WHEN rn = 2 THEN ba.corresponding_agent END) AS `Corresponding Author/Agent 2`,
+    MAX(CASE WHEN rn = 3 THEN ba.corresponding_agent END) AS `Corresponding Author/Agent 3`,
+    MAX(CASE WHEN rn = 4 THEN ba.corresponding_agent END) AS `Corresponding Author/Agent 4`,
+    MAX(CASE WHEN rn = 1 THEN ba.publishing_consultant END) AS `Publishing Consultant 1`,
+    MAX(CASE WHEN rn = 2 THEN ba.publishing_consultant END) AS `Publishing Consultant 2`,
+    MAX(CASE WHEN rn = 3 THEN ba.publishing_consultant END) AS `Publishing Consultant 3`,
+    MAX(CASE WHEN rn = 4 THEN ba.publishing_consultant END) AS `Publishing Consultant 4`,
+    MAX(CASE WHEN rn = 1 THEN a.email END) AS `Email Address 1`,
+    MAX(CASE WHEN rn = 2 THEN a.email END) AS `Email Address 2`,
+    MAX(CASE WHEN rn = 3 THEN a.email END) AS `Email Address 3`,
+    MAX(CASE WHEN rn = 4 THEN a.email END) AS `Email Address 4`,
+    MAX(CASE WHEN rn = 1 THEN a.phone END) AS `Contact No. 1`,
+    MAX(CASE WHEN rn = 2 THEN a.phone END) AS `Contact No. 2`,
+    MAX(CASE WHEN rn = 3 THEN a.phone END) AS `Contact No. 3`,
+    MAX(CASE WHEN rn = 4 THEN a.phone END) AS `Contact No. 4`,
+    CASE 
+        WHEN b.writing_end IS NOT NULL 
+        AND b.proofreading_end IS NOT NULL 
+        AND b.formatting_end IS NOT NULL 
+        THEN 'TRUE' 
+        ELSE 'FALSE' 
+    END AS `Book Complete`,
+    CASE WHEN b.apply_isbn = 1 THEN 'TRUE' ELSE 'FALSE' END AS `Apply ISBN`,
+    b.isbn AS `ISBN`,
+    MAX(CASE WHEN ba.cover_agreement_sent = 1 THEN 'TRUE' ELSE 'FALSE' END) AS `Send Cover Page and Agreement`,
+    MAX(CASE WHEN ba.agreement_received = 1 THEN 'TRUE' ELSE 'FALSE' END) AS `Agreement Received`,
+    MAX(CASE WHEN ba.digital_book_approved = 1 THEN 'TRUE' ELSE 'FALSE' END) AS `Digital Prof`,
+    MAX(CASE WHEN ba.printing_confirmation = 1 THEN 'TRUE' ELSE 'FALSE' END) AS `Confirmation`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.welcome_mail_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Welcome Mail / Confirmation 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.welcome_mail_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Welcome Mail / Confirmation 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.welcome_mail_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Welcome Mail / Confirmation 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.welcome_mail_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Welcome Mail / Confirmation 4`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.author_details_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Author Detail 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.author_details_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Author Detail 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.author_details_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Author Detail 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.author_details_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Author Detail 4`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.photo_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Photo 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.photo_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Photo 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.photo_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Photo 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.photo_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Photo 4`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.id_proof_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `ID Proof 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.id_proof_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `ID Proof 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.id_proof_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `ID Proof 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.id_proof_recive = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `ID Proof 4`,
+    b.cover_by AS `Cover Page`,
+    NULL AS `Back Page Update`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.cover_agreement_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Send Cover Page and Agreement 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.cover_agreement_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Send Cover Page and Agreement 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.cover_agreement_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Send Cover Page and Agreement 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.cover_agreement_sent = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Send Cover Page and Agreement 4`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.agreement_received = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Agreement Received 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.agreement_received = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Agreement Received 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.agreement_received = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Agreement Received 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.agreement_received = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Agreement Received 4`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.digital_book_approved = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Digital Prof 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.digital_book_approved = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Digital Prof 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.digital_book_approved = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Digital Prof 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.digital_book_approved = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Digital Prof 4`,
+    MAX(CASE WHEN rn = 1 THEN CASE WHEN ba.printing_confirmation = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Confirmation 1`,
+    MAX(CASE WHEN rn = 2 THEN CASE WHEN ba.printing_confirmation = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Confirmation 2`,
+    MAX(CASE WHEN rn = 3 THEN CASE WHEN ba.printing_confirmation = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Confirmation 3`,
+    MAX(CASE WHEN rn = 4 THEN CASE WHEN ba.printing_confirmation = 1 THEN 'TRUE' ELSE 'FALSE' END END) AS `Confirmation 4`,
+    CASE WHEN b.ready_to_print = 1 THEN 'TRUE' ELSE 'FALSE' END AS `Ready to Print`,
+    b.print_status AS `Print`,
+    b.amazon_link AS `Amazon Link`,
+    b.agph_link AS `AGPH Link`,
+    b.google_link AS `Google Link`,
+    b.flipkart_link AS `Flipkart Link`,
+    NULL AS `Final Mail`,
+    CASE WHEN b.deliver = 1 THEN 'TRUE' ELSE 'FALSE' END AS `Deliver`,
+    b.google_review AS `Google Review`,
+    NULL AS `Remark`,
+    MAX(ba.delivery_date) AS `Delivery Date`,
+    CASE WHEN b.writing_end IS NOT NULL THEN 'TRUE' ELSE 'FALSE' END AS `Writing Complete`,
+    b.writing_by AS `Writing By`,
+    b.writing_start AS `Writing Start Date`,
+    TIME(b.writing_start) AS `Writing Start Time`,
+    b.writing_end AS `Writing End Date`,
+    TIME(b.writing_end) AS `Writing End Time`,
+    CASE WHEN b.proofreading_end IS NOT NULL THEN 'TRUE' ELSE 'FALSE' END AS `Proofreading Complete`,
+    b.proofreading_by AS `Proofreading By`,
+    b.proofreading_start AS `Proofreading Start Date`,
+    TIME(b.proofreading_start) AS `Proofreading Start Time`,
+    b.proofreading_end AS `Proofreading End Date`,
+    TIME(b.proofreading_end) AS `Proofreading End Time`,
+    CASE WHEN b.formatting_end IS NOT NULL THEN 'TRUE' ELSE 'FALSE' END AS `Formating Complete`,
+    b.formatting_by AS `Formating By`,
+    b.formatting_start AS `Formating Start Date`,
+    TIME(b.formatting_start) AS `Formating Start Time`,
+    b.formatting_end AS `Formating End Date`,
+    TIME(b.formatting_end) AS `Formating End Time`,
+    MONTHNAME(b.date) AS `Month`,
+    YEAR(b.date) AS `Year`,
+    DATEDIFF(CURDATE(), b.date) AS `Since Enrolled`
+FROM books b
+LEFT JOIN (
+    SELECT 
+        ba.*,
+        ROW_NUMBER() OVER (PARTITION BY ba.book_id ORDER BY ba.author_position, ba.id) AS rn
+    FROM book_authors ba
+) ba ON b.book_id = ba.book_id AND ba.rn <= 4
+LEFT JOIN authors a ON ba.author_id = a.author_id
+GROUP BY b.book_id, b.title, b.date, b.apply_isbn, b.isbn, b.ready_to_print, b.print_status, b.deliver, 
+         b.google_review, b.flipkart_link, b.google_link, b.agph_link, b.amazon_link, 
+         b.writing_by, b.proofreading_by, b.formatting_by, b.writing_start, b.writing_end, 
+         b.proofreading_start, b.proofreading_end, b.formatting_start, b.formatting_end, 
+         b.cover_by
+ORDER BY b.book_id;
+"""
+
+with st.spinner("Data fetching in progress...", show_time=False):
+    conn = connect_db()
+    df = conn.query(query, show_spinner=False)
+
 try:
     # Fetch data from a Google Sheet
     @st.cache_data(show_spinner=False)
@@ -139,7 +286,7 @@ try:
 
     with st.spinner("Loading operations data..."):
         operations_data = fetch_operations_sheet_data(sheets['Operations'])
-        operations_data = operations_preprocess(operations_data) 
+        operations_data = operations_preprocess(operations_data)
 
     # Function to get book and author details with error handling
     def get_book_and_author_details(book_info):
@@ -709,3 +856,8 @@ except Exception as e:
 #     fit_columns_on_grid_load=True,
 #     allow_unsafe_jscode=True
 # )
+
+
+
+val = stx.stepper_bar(steps=["Ready", "Get Set", "Go","Ok", "Done","Break"],)
+st.info(f"Phase #{val}")
