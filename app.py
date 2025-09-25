@@ -90,6 +90,7 @@ if not st.session_state.visited:
 def read_sheets_from_json():
     if os.path.exists(sheets_json_path):
         with open(sheets_json_path, 'r') as file:
+            st.markdown(f"Reading sheets configuration from `{sheets_json_path}`")
             return json.load(file)
     return {}
 
