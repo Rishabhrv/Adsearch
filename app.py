@@ -76,7 +76,6 @@ def validate_token():
         st.stop()
 
 validate_token()
-validate_token()
 
 #add anotherchnages
 
