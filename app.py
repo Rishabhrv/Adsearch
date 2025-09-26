@@ -96,6 +96,7 @@ def read_sheets_from_json():
         with open(sheets_json_path, 'r') as file:
             st.write("Loading sheet configuration...")
             st.markdown(f"Reading sheets configuration from `{sheets_json_path}`")
+            st.write(f"File path: {os.path.abspath(sheets_json_path)}")
             return json.load(file)
     return {}
 
@@ -128,7 +129,7 @@ def operations_preprocess(data):
     if 'Date' in data.columns:
         
         # Add a column for the month name
-        data['Month'] = data['Date'].dt.strftime('%B')
+        data['Month'] = data['No'].dt.strftime('%B')
 
         # Add a column for the days since enrollment
         current_date = pd.Timestamp.now()  # Current datetime
