@@ -76,6 +76,7 @@ def validate_token():
         st.stop()
 
 validate_token()
+validate_token()
 
 #add anotherchnages
 
@@ -95,6 +96,7 @@ def read_sheets_from_json():
     if os.path.exists(sheets_json_path):
         with open(sheets_json_path, 'r') as file:
             st.write("Loading sheet configuration...")
+            st.markdown(f"Reading sheets configuration from `{sheets_json_path}`")
             return json.load(file)
     return {}
 
@@ -134,6 +136,9 @@ def operations_preprocess(data):
         data['Since Enrolled'] = (current_date - data['Date']).dt.days
 
     return data
+
+def new_fucntoin():
+    st.write("New Function")
 
 def connect_db():
     try:
